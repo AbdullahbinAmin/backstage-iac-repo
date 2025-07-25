@@ -1,0 +1,65 @@
+name: OPA Policy Check
+
+on:
+  pull_request:
+    branches:
+      - main # This workflow runs on PRs targeting the main branch
+
+jobs:
+  check-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.x.x # Use a compatible version for your plan
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan (JSON)
+        id: plan_json
+        run: terraform plan -input=false -out=tfplan -json > tfplan.json
+        continue-on-error: true # Allow plan to fail if issues arise, OPA still checks
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.66.0/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: Evaluate OPA Policy
+        id: opa_evaluation
+        run: |
+          set +e # Don't exit immediately if opa eval fails due to deny
+          OPA_RESULT=$(opa eval \
+            --data policies/s3_visibility_policy.rego \
+            --data tfplan.json \
+            --entry data.terraform.aws.s3.deny \
+            --format json)
+          echo "OPA Result: $OPA_RESULT"
+          echo "OPA_RESULT=$OPA_RESULT" >> $GITHUB_OUTPUT
+
+          # Check if the deny rule returned any violations
+          if [ "$(echo "$OPA_RESULT" | jq 'length')" -gt 0 ]; then
+            echo "OPA Policy Violation Detected!"
+            echo "$OPA_RESULT" | jq -r '.[].expressions[].value[]' # Print just the message
+            exit 1 # Fail the GitHub Action
+          else
+            echo "OPA Policy Passed: No violations detected."
+          fi
+        env:
+          # Pass AWS credentials to the workflow if needed for plan (though plan often doesn't need full creds if you're not referencing state)
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Policy Status (for GitHub Checks UI)
+        if: failure()
+        run: echo "OPA Policy Check Failed"
+
+      - name: Policy Status (for GitHub Checks UI)
+        if: success()
+        run: echo "OPA Policy Check Passed"
