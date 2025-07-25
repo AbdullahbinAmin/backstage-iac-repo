@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "my_demo_bucket" {
     Environment = "Demo"
     Project     = "Backstage"
     Owner       = "Abdullah"
-    Visibility  = "Public" # We'll use this tag for policy enforcement later
+    Visibility  = "Private" # We'll use this tag for policy enforcement later
   }
 }
 
