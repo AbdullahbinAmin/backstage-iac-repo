@@ -1,0 +1,20 @@
+# ~/backstage-iac-repo/catalog-info.yaml (Full Content)
+
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: my-demo-s3-bucket # This should match the bucket name you are usually creating
+  description: The S3 bucket provisioned by Backstage/Terraform, managed by Policy-as-Code.
+  annotations:
+    # Link back to the GitHub repository where its definition lives
+    # Ensure this URL is correct for your repo
+    'github.com/project-slug': 'YOUR_GITHUB_USERNAME/backstage-iac-repo'
+    'backstage.io/managed-by-location': 'url:https://github.com/YOUR_GITHUB_USERNAME/backstage-iac-repo/blob/main/main.tf'
+    'backstage.io/techdocs-ref': 'url:https://github.com/YOUR_GITHUB_USERNAME/backstage-iac-repo/tree/main'
+spec:
+  type: aws-s3-bucket # Custom type for this resource
+  owner: user:default/guest # Owner in Backstage, e.g., default/guest or default/abdullah
+  system: my-infrastructure # Optional: Relates to a broader system
+  lifecycle: production # Or 'experimental', 'development'
+  # If this bucket is specifically for a service, you can link it:
+  # dependsOn: [component:default/my-example-microservice] # Replace with actual component
