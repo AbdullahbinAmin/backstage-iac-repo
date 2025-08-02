@@ -6,15 +6,18 @@ provider "aws" {
 }
 
 # Define a simple S3 bucket
-resource "aws_s3_bucket" "my_demo_bucket" {
-  bucket = "abdullah-backstage-s3-demo-unique-jul26" # IMPORTANT: REPLACE THIS WITH A GLOBALLY UNIQUE NAME (no dots in new bucket names)
+resource "aws_s3_bucket" "bucket" {
+  bucket = var.bucket_name
+  region = var.bucket_region
   tags = {
-    Environment = "Demo"
-    Project     = "Backstage"
-    Owner       = "Abdullah"
-    Visibility  = "Private" # We'll use this tag for policy enforcement (NON-COMPLIANT)
+    Project    = "Backstage"
+    Visibility = var.bucket_visibility
   }
 }
+
+variable "bucket_name" {}
+variable "bucket_region" {}
+variable "bucket_visibility" {}
 
 # Output the bucket name for verification
 output "bucket_name" {
