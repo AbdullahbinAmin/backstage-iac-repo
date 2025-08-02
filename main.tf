@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "my_demo_bucket" {
   tags = {
     Environment = "Demo"
     Project     = "Backstage"
-    Owner       = "Abdullah"
+    Owner       = "AbdullahbinAmin"
     Visibility  = "Public" # We'll use this tag for policy enforcement later
   }
 }
