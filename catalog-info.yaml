@@ -8,9 +8,9 @@ metadata:
   annotations:
     # Link back to the GitHub repository where its definition lives
     # Ensure this URL is correct for your repo
-    'github.com/project-slug': 'YOUR_GITHUB_USERNAME/backstage-iac-repo'
-    'backstage.io/managed-by-location': 'url:https://github.com/YOUR_GITHUB_USERNAME/backstage-iac-repo/blob/main/main.tf'
-    'backstage.io/techdocs-ref': 'url:https://github.com/YOUR_GITHUB_USERNAME/backstage-iac-repo/tree/main'
+    'github.com/project-slug': 'AbdullahbinAmin/backstage-iac-repo'
+    'backstage.io/managed-by-location': 'url:https://github.com/AbdullahbinAmin/backstage-iac-repo/blob/main/main.tf'
+    'backstage.io/techdocs-ref': 'url:https://github.com/AbdullahbinAmin/backstage-iac-repo/tree/main'
 spec:
   type: aws-s3-bucket # Custom type for this resource
   owner: user:default/guest # Owner in Backstage, e.g., default/guest or default/abdullah
