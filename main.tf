@@ -1,20 +1,40 @@
-# Configure the AWS Provider
+# # main.tf
+# provider "aws" {
+#   region = "ap-south-1"
+# }
+
+# resource "aws_s3_bucket" "my_demo_bucket" {
+#   bucket = "abdullah-backstage-s3-demo-unique-aug10" # Change this!
+#   tags = {
+#     Environment = "Demo"
+#     Project     = "Backstage"
+#     Owner       = "Abdullah"
+#     Visibility  = "Private"
+#   }
+# }
+
+# output "bucket_name" {
+#   value = aws_s3_bucket.my_demo_bucket.bucket
+# }
+
+# This tells Terraform we are using Amazon Web Services (AWS)
 provider "aws" {
-  region = "ap-south-1" # You can change this to your preferred region, e.g., "eu-west-1"
+  region = "us-east-1"
 }
 
-# Define a simple S3 bucket
-resource "aws_s3_bucket" "my_demo_bucket" {
-  bucket = "s3-bucket-backstage-demo" # IMPORTANT: REPLACE THIS WITH A GLOBALLY UNIQUE NAME
+# This defines our S3 storage bucket
+resource "aws_s3_bucket" "data_storage" {
+  # Change this bucket name to be globally unique!
+  bucket = "abdullah-banking-demo-bucket-12345"
+
+  # This ACL (Access Control List) is what our policy will check.
+  # "private" is secure. "public-read" would be a violation.
+  acl = "private"
+
+  # These are labels for our bucket, important for compliance
   tags = {
-    Environment = "Demo"
-    Project     = "Backstage"
-    Owner       = "AbdullahbinAmin"
-    Visibility  = "Public" # We'll use this tag for policy enforcement later
+    Name        = "Secure-Banking-Data-Storage"
+    Owner       = "Abdullah Bin Amin"
+    CostCenter  = "Banking-Demo-Project"
   }
-}
-
-# Output the bucket name for verification
-output "bucket_name" {
-  value = aws_s3_bucket.my_demo_bucket.bucket
 }

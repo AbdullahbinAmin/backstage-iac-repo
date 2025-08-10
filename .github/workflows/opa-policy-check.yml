@@ -1,9 +1,10 @@
+# .github/workflows/opa-policy-check.yml
 name: OPA Policy Check
 
 on:
   pull_request:
     branches:
-      - main # This workflow runs on PRs targeting the main branch
+      - main
 
 jobs:
   check-policy:
@@ -15,19 +16,17 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.0 # Use a compatible version for your plan
+          terraform_version: 1.9.0
 
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan (JSON)
         id: plan_json
-        # This step must succeed for OPA to get valid input.
-        # AWS credentials are provided via env vars in the 'run' step if needed for plan
         run: terraform plan -input=false -out=tfplan -json > tfplan.json
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: AKIA36JADPDWXDTDX4BR
+          AWS_SECRET_ACCESS_KEY: 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
 
       - name: Install OPA
         run: |
@@ -41,24 +40,26 @@ jobs:
       - name: Evaluate OPA Policy
         id: opa_evaluation
         run: |
-          # Execute OPA and capture its output (the denial messages)
           OPA_RESULT=$(opa eval \
             --data policies/s3_visibility_policy.rego \
             --data tfplan.json \
             "data.terraform.aws.s3.deny" \
             --format json \
-            --fail-defined=false # Do not exit with 2 if deny is found
+            --fail-defined=false \
           )
+          echo "OPA Raw Result: $OPA_RESULT"
 
-          echo "OPA Raw Result: $OPA_RESULT" # Print raw OPA output for debugging
-
-          # Check if the deny rule returned any violations
-          # This will check if the 'OPA_RESULT' JSON array contains any elements
           if [ "$(echo "$OPA_RESULT" | jq 'length')" -gt 0 ]; then
             echo "OPA Policy Violation Detected!"
-            # Extract and print the policy messages for clarity
             echo "$OPA_RESULT" | jq -r '.[].expressions[].value[]'
-            exit 1 # Fail the GitHub Action if violations are found
+            exit 1
           else
             echo "OPA Policy Passed: No violations detected."
           fi
+      - name: Policy Status (for GitHub Checks UI)
+        if: failure()
+        run: echo "OPA Policy Check Failed"
+
+      - name: Policy Status (for GitHub Checks UI)
+        if: success()
+        run: echo "OPA Policy Check Passed"
