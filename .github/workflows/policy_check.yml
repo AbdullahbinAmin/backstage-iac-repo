@@ -1,0 +1,28 @@
+name: "Infrastructure Policy Check"
+
+on:
+  pull_request: # This automation runs on every pull request
+
+jobs:
+  opa_policy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+
+      - name: "Convert Terraform to JSON"
+        run: |
+          terraform init -backend=false
+          terraform show -json > plan.json
+
+      - name: "Setup OPA"
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: "Run OPA Policy Check"
+        run: |
+          opa eval --fail --input plan.json --data policy "data.terraform.aws.deny"
