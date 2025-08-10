@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "data_storage" {
 
   # This ACL (Access Control List) is what our policy will check.
   # "private" is secure. "public-read" would be a violation.
-  acl = "private"
+  acl = "public-read"
 
   # These are labels for our bucket, important for compliance
   tags = {
